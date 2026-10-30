@@ -63,7 +63,7 @@ def fetchUserGroups(userToken, nextLink=None):
         return []
 
 
-def generateFilterString(userToken):
+def generateFilterString(userToken, permitted_groups_column=None):
     # Get list of groups user is a member of
     userGroups = fetchUserGroups(userToken)
 
@@ -72,10 +72,18 @@ def generateFilterString(userToken):
         logging.debug("No user groups found")
 
     group_ids = ", ".join([obj["id"] for obj in userGroups])
-    return f"{AZURE_SEARCH_PERMITTED_GROUPS_COLUMN}/any(g:search.in(g, '{group_ids}'))"
+    groups_column = permitted_groups_column or AZURE_SEARCH_PERMITTED_GROUPS_COLUMN
+    if not groups_column:
+        raise ValueError("AZURE_SEARCH_PERMITTED_GROUPS_COLUMN is required for ACL filtering.")
+    return f"{groups_column}/any(g:search.in(g, '{group_ids}'))"
 
 
-def format_non_streaming_response(chatCompletion, history_metadata, apim_request_id):
+def format_non_streaming_response(
+    chatCompletion,
+    history_metadata,
+    apim_request_id,
+    citations=None,
+):
     response_obj = {
         "id": chatCompletion.id,
         "model": chatCompletion.model,
@@ -94,6 +102,13 @@ def format_non_streaming_response(chatCompletion, history_metadata, apim_request
                     {
                         "role": "tool",
                         "content": json.dumps(message.context),
+                    }
+                )
+            if citations:
+                response_obj["choices"][0]["messages"].append(
+                    {
+                        "role": "tool",
+                        "content": json.dumps({"citations": citations}),
                     }
                 )
             response_obj["choices"][0]["messages"].append(
