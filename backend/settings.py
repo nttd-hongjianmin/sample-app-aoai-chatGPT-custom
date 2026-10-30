@@ -329,7 +329,10 @@ class _AzureSearchSettings(BaseSettings, DatasourcePayloadConstructor):
                     "Document-level access control is enabled, but user access token could not be fetched."
                 )
 
-            filter_string = generateFilterString(user_token)
+            filter_string = generateFilterString(
+                user_token,
+                self.permitted_groups_column,
+            )
             logging.debug(f"FILTER: {filter_string}")
             return filter_string
         
