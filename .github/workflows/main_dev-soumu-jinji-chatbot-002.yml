@@ -63,4 +63,4 @@ jobs:
         with:
           app-name: 'dev-soumu-jinji-chatbot-002'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_902DF37DA2CA4273BAB5179ECFB13DAD }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_31CB355AAD184B16B98A04A5A7B3EC2D }}
